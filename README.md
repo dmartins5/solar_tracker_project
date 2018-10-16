@@ -9,7 +9,15 @@ The hardware that will work with this Solar Tracker includes:
 
 - RGS13 Rotational Motor
 
+- Continous Server Motor
+
 - 4x Photoresistors
+
+UPDATE #3: Source Code Version 0.1.2 is Available:
+
+An update for the source code is as updated version of the code for the RGS13. The 8-Bit Timer variables were renamed to Timer0 to avoid confusion since Timer0 is a specific 8-Bit Timer.
+
+In addition to that, support for Timer1 on the ATmega328P is supported which is the 16-bit timer. This timer will allow for a higher degree of accuracy than what could be archieved through an 8-bit timer. For now, this piece of the project is done until we add code for the Photoresistors and then we can merge the values we get from the photoresistors and use the data from photoresistors to pin point where the motor should be positioned.
 
 UPDATE #2: Source Code Version 0.1.1 is Available:
 
