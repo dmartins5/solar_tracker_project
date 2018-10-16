@@ -9,11 +9,11 @@
 
 int main()
 {
-	init_rgs13_timer0();
+	init_rgs13_timer1();
 
 	while(1)
 	{
-		update_rgs13_timer0();
+		update_rgs13_timer1();
 	}
 	return 0;
 }
