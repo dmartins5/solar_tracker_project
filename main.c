@@ -6,13 +6,16 @@
  */
 
 #include "rgs13.h"
+#include "fs5103r.h"
 
 int main()
 {
+	init_fs5103r_timer0();
 	init_rgs13_timer1();
 
 	while(1)
 	{
+		update_med_fs5103r_timer0();
 		update_rgs13_timer1();
 	}
 	return 0;
