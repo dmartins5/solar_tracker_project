@@ -5,13 +5,25 @@ The hardware that will work with this Solar Tracker includes:
 
 - ATmega328P/PB
 
-? 16x2 LCD Display with an I2C Module.
-
 - RGS13 Rotational Motor
 
 - FS5103R Servor Motor
 
 - 4x Photoresistors
+
+- 2x Push Buttons (1 for Calibration and 1 for Reset)
+
+? SPI
+
+<b>UPDATE #5:</b> Source Code Version 0.3 is Available, Major Changes since last version:
+
+A lot of changes have occurred since the last version.
+
+Mainly that all the code is being merged into a single file which is more managable when it comes to dealing with global variables and interrupts. So the code base no longer has header files and all of the functions are stored in one place.
+
+A major change in the program's function is that the ADC values from each pin can finally be read and is stored into an array. Additional code must be implemented to perform an output comparison. Then the comparison determines how the motors will position the solar panel.
+
+The additional part of this update is that the circuit will implement a calibration button and a reset button which is a WIP.
 
 <b>UPDATE #4:</b> Source Code Version 0.2 is Available:
 
