@@ -13,7 +13,45 @@ The hardware that will work with this Solar Tracker includes:
 
 - 2x Push Buttons (1 for Calibration and 1 for Reset)
 
-? SPI
+<b>UPDATE #6:</b> Source Code Version 0.4 is Available
+
+The changes in this version mainly includes additional variables such as calibration variables and a sign variable to determine direction. In addition the calibration button for PORTC5 has been implemented to perform the calibration:
+
+The calibration operates with two different magnitude values (cal_y for ADC0 and ADC2 and cal_x for ADC3 and ADC1), one for each motor. Unlike the actual number values from the num array of ADC values, the calibration values are signed 16-bit integers, and if it goes negative, the sign value that indicates direction will change and cal_y or cal_x get's set to a positive number by 2's Compliment.
+
+RGS13 will use cal_y and FS5103R will use cal_x and an 8 bit direction value called sign which will tell which ADC value is greater and has 4 possible values from 0 to 3. Both motors share the sign value.
+
+<table>
+  <tr>
+    <th>cal_y</th>
+    <th>cal_x</th>
+    <th>sign</th>
+  </tr>
+  <tr>
+    <td>+/0</td>
+    <td>+/0</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td>-</td>
+    <td>+/0</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>+/0</td>
+    <td>-</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td>-</td>
+    <td>-</td>
+    <td>3</td>
+  </tr>
+</table>
+
+Where +/0 is a non-negative value (0 or greater) and - is a negative number.
+
+Seems like the program is getting close to complete and is a matter of now using the calibration values to have the motor move to the desired direction (directly facing the sun).
 
 <b>UPDATE #5:</b> Source Code Version 0.3 is Available, Major Changes since last version:
 
