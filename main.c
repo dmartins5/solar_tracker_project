@@ -3,7 +3,7 @@
  * ECE-388
  * Lab Project: Solar Tracker
  * Version 0.5
- */
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -33,6 +33,12 @@ uint16_t cal_y = 0;
 uint16_t cal_x = 0;
 int8_t height = 80;
 uint8_t sign = 0;
+
+volatile uint16_t num[] = {0, 0, 0, 0};
+volatile uint8_t idx = 0;
+volatile uint16_t cal_y = 0;
+volatile uint16_t cal_x = 0;
+volatile uint8_t sign = 0;
 
 /* NOTE: THIS FUNCTION IS FOR TESTING PURPOSES, WILL NOT BE USED FOR FINAL PROGRAM */
 /*void display_adc_val()
@@ -114,6 +120,8 @@ void update_rgs13()
 		_delay_ms(30);
                 calibrate();
         }
+        OCR1B = ((num[idx])/128) - 11;
+        _delay_ms(RGS13_T_MS);
 }
 
 void init_fs5103r()
@@ -143,7 +151,25 @@ void update_fs5103r()
 /* Calibration Operation */
 void calibrate()
 {
-	idx = 0;
+        OCR0B = counter_timer0;
+        _delay_ms(FS5103R_T_MS);
+        if(counter_timer0 >= FS5103R_MED_T0)
+                flag_timer0 = 0;
+        else if (counter_timer0 < FS5103R_MIN_T0)
+                flag_timer0 = 1;
+        if(flag_timer0 == 1)
+                counter_timer0++;
+        else if(flag_timer0 == 0 && counter_timer0 == FS5103R_MED_T0) {
+                _delay_ms(5000);
+                counter_timer0--;
+        } else {
+                counter_timer0--;
+        }
+}
+/* Calibration Operation */
+void calibrate()
+{
+	      idx = 0;
         init_adc_converter();
         num[idx] = read_adc(idx);
         _delay_ms(25);
@@ -178,8 +204,13 @@ void calibrate()
         }
         //display_cal_val(cal_x);
         idx = 0;
-	update_rgs13();
-	update_fs5103r();
+	      update_rgs13();
+	      update_fs5103r();
+}
+/* Reset Function */
+void reset()
+{
+  
 }
 /* Main Function */
 int main(void)
@@ -213,6 +244,7 @@ ISR(WDT_vect)
 	else
 		idx++;
 	//update_rgs13_timer();
+	//update_rgs13_timer1(0);
 	//update_med_fs5103r_timer0(0);
 	sleep_enable();
 }
