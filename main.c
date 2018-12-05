@@ -120,8 +120,6 @@ void update_rgs13()
 		_delay_ms(30);
                 calibrate();
         }
-        OCR1B = ((num[idx])/128) - 11;
-        _delay_ms(RGS13_T_MS);
 }
 
 void init_fs5103r()
@@ -169,7 +167,7 @@ void calibrate()
 /* Calibration Operation */
 void calibrate()
 {
-	      idx = 0;
+	idx = 0;
         init_adc_converter();
         num[idx] = read_adc(idx);
         _delay_ms(25);
@@ -207,11 +205,6 @@ void calibrate()
 	      update_rgs13();
 	      update_fs5103r();
 }
-/* Reset Function */
-void reset()
-{
-  
-}
 /* Main Function */
 int main(void)
 {
@@ -219,7 +212,7 @@ int main(void)
 	PORTC = (1 << PORTC5);
 	wdt_init();
 	init_rgs13();
-	//init_fs5103r_timer0();
+	init_fs5103r_timer0();
 	wdt_startup();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	sei();
