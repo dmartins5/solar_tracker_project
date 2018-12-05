@@ -1,10 +1,9 @@
-
 /* Drew Martins, Justin Bickford, Eric Keffer
  * November 13, 2018
  * ECE-388
  * Lab Project: Solar Tracker
- * Version 0.4
- */
+ * Version 0.5
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -12,19 +11,28 @@
 #include <avr/sleep.h>
 
 #include <util/delay.h>
-#define F_CPU 16000000UL
+#define F_CPU		16000000UL
+#define THRESHOLD	15
 
-#define RGS13_MAX_T1    300
-#define RGS13_MIN_T1    80
-#define RGS13_T_MS      30
+#define RGS13_MAX	300
+#define RGS13_MIN	80
 
-#define FS5103R_MAX_T0  75
-#define FS5103R_MED_T0  46
-#define FS5103R_MIN_T0  20
-#define FS5103R_T_MS    250
+#define FS5103R_MAX	75
+#define FS5103R_STO	46
+#define FS5103R_MIN	20
 
-volatile uint8_t counter_timer0 = FS5103R_MIN_T0;
+volatile uint8_t counter_timer0 = FS5103R_MIN;
 volatile uint8_t flag_timer0 = 0;
+
+void update_fs5103r();
+void calibrate();
+
+uint16_t num[] = {0, 0, 0, 0};
+volatile uint8_t idx = 0;
+uint16_t cal_y = 0;
+uint16_t cal_x = 0;
+int8_t height = 80;
+uint8_t sign = 0;
 
 volatile uint16_t num[] = {0, 0, 0, 0};
 volatile uint8_t idx = 0;
@@ -49,7 +57,7 @@ volatile uint8_t sign = 0;
 /* The WDT Functions are for the Global Timer */
 void wdt_init()
 {
-        if(MCUSR & _BV(WDRF))
+        if(MCUSR & (1 << WDRF))
         {
                 MCUSR &=~ (1 << WDRF);                  // Clear the WDT reset flag
                 WDTCSR |= (1 << WDCE) | (1 << WDE);     // Enable the WD Change Bit
@@ -95,6 +103,23 @@ void init_rgs13()
 }
 void update_rgs13()
 {
+        if(OCR1B < 80)
+                OCR0B = 80;
+        if(OCR1B > 300)
+                OCR1B = 300;
+
+        if(cal_y > THRESHOLD && (sign == 0 || sign == 2))
+        {
+                OCR1B += 1;
+		_delay_ms(30);
+                calibrate();
+        }
+        if(cal_y > THRESHOLD && (sign == 1 || sign == 3))
+        {
+                OCR1B -= 1;
+		_delay_ms(30);
+                calibrate();
+        }
         OCR1B = ((num[idx])/128) - 11;
         _delay_ms(RGS13_T_MS);
 }
@@ -109,6 +134,23 @@ void init_fs5103r()
 /* The FS5013R functions are for operating the FS5013R Motor using Timer0 */
 void update_fs5103r()
 {
+        if(cal_x > THRESHOLD && (sign == 0 || sign == 1))
+	{
+		OCR0B = FS5103R_MAX;
+		_delay_ms(250);
+		calibrate();
+	}
+	if(cal_x > THRESHOLD && (sign == 2 || sign == 3))
+	{
+		OCR0B = FS5103R_MIN;
+		_delay_ms(250);
+		calibrate();
+	}
+	OCR0B = FS5103R_STO;
+}
+/* Calibration Operation */
+void calibrate()
+{
         OCR0B = counter_timer0;
         _delay_ms(FS5103R_T_MS);
         if(counter_timer0 >= FS5103R_MED_T0)
@@ -122,12 +164,12 @@ void update_fs5103r()
                 counter_timer0--;
         } else {
                 counter_timer0--;
-	}
+        }
 }
 /* Calibration Operation */
 void calibrate()
 {
-	idx = 0;
+	      idx = 0;
         init_adc_converter();
         num[idx] = read_adc(idx);
         _delay_ms(25);
@@ -162,20 +204,21 @@ void calibrate()
         }
         //display_cal_val(cal_x);
         idx = 0;
+	      update_rgs13();
+	      update_fs5103r();
 }
 /* Reset Function */
 void reset()
 {
-
+  
 }
 /* Main Function */
 int main(void)
 {
 	DDRC &=~ (1 << DDC5);
 	PORTC = (1 << PORTC5);
-	
 	wdt_init();
-	//init_rgs13_timer1();
+	init_rgs13();
 	//init_fs5103r_timer0();
 	wdt_startup();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -200,6 +243,7 @@ ISR(WDT_vect)
 		idx = 0;
 	else
 		idx++;
+	//update_rgs13_timer();
 	//update_rgs13_timer1(0);
 	//update_med_fs5103r_timer0(0);
 	sleep_enable();

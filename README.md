@@ -13,6 +13,10 @@ The hardware that will work with this Solar Tracker includes:
 
 - 2x Push Buttons (1 for Calibration and 1 for Reset)
 
+<b>UPDATE #7:</b> Source Code Version 0.5 is Available
+
+The changes in this code are minor from Version 0.4, the changes made includes integrating the functionality of the rgs13 and fs5103r motors. This will most likely be the final version of the code prior to Version 1.0.
+
 <b>UPDATE #6:</b> Source Code Version 0.4 is Available
 
 The changes in this version mainly includes additional variables such as calibration variables and a sign variable to determine direction. In addition the calibration button for PORTC5 has been implemented to perform the calibration:
